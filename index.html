@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security API Exercise</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <p class="eyebrow">Course exercise</p>
+            <h1>Security API Exercise</h1>
+            <p class="subtitle">
+                Frontend client that sends a static
+                <code>x-api-key</code> header to the backend.
+            </p>
+        </header>
+
+        <section class="actions" aria-label="API actions">
+            <button type="button" id="btn-health">Check Health</button>
+            <button type="button" id="btn-get">Get Protected Data</button>
+            <button type="button" id="btn-post">Send POST Request</button>
+        </section>
+
+        <section class="response-panel" aria-live="polite">
+            <div class="response-header">
+                <h2>Response</h2>
+                <span id="status-badge" class="badge">Waiting</span>
+            </div>
+            <pre id="response-box" class="response-box">API response will appear here.</pre>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
