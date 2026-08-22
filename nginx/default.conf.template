@@ -1,0 +1,29 @@
+server {
+    listen 80;
+    server_name localhost;
+
+    # root / index: serve the static frontend from the nginx html directory.
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # location /: static files (HTML, CSS, JS). Fall back to index.html if needed.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # location /health: public backend check. Proxied as-is, without extra headers.
+    location /health {
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # location /api/: reverse proxy to the backend. Nginx adds x-api-key here.
+    # The browser only calls /api/... on this same origin; it never sees the key.
+    location /api/ {
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header x-api-key "${API_KEY}";
+    }
+}

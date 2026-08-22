@@ -1,6 +1,3 @@
-const API_BASE_URL = "http://localhost:8000";
-const API_KEY = "mi-api-key-secreta-123456";
-
 const responseBox = document.getElementById("response-box");
 const statusBadge = document.getElementById("status-badge");
 const buttons = {
@@ -34,22 +31,13 @@ function formatBody(text) {
     }
 }
 
-async function callApi(path, method, includeApiKey) {
+async function callApi(path, method) {
     setLoading(true);
     showStatus("Loading", null);
     responseBox.textContent = "Sending request...";
 
-    const headers = {};
-    if (includeApiKey) {
-        headers["x-api-key"] = API_KEY;
-    }
-
     try {
-        const response = await fetch(`${API_BASE_URL}${path}`, {
-            method,
-            headers,
-        });
-
+        const response = await fetch(path, { method });
         const rawBody = await response.text();
         const formattedBody = formatBody(rawBody);
 
@@ -61,8 +49,7 @@ async function callApi(path, method, includeApiKey) {
     } catch (error) {
         showStatus("Request failed", false);
         responseBox.textContent =
-            "Could not reach the backend.\n\n" +
-            "Make sure the API is running at http://localhost:8000\n" +
+            "Could not reach the API through this page.\n\n" +
             `Details: ${error.message}`;
     } finally {
         setLoading(false);
@@ -70,13 +57,13 @@ async function callApi(path, method, includeApiKey) {
 }
 
 buttons.health.addEventListener("click", () => {
-    callApi("/health", "GET", false);
+    callApi("/health", "GET");
 });
 
 buttons.get.addEventListener("click", () => {
-    callApi("/api/data", "GET", true);
+    callApi("/api/data", "GET");
 });
 
 buttons.post.addEventListener("click", () => {
-    callApi("/api/data", "POST", true);
+    callApi("/api/data", "POST");
 });

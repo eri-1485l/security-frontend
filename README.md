@@ -1,74 +1,74 @@
 # Security Frontend
 
-Frontend for the **API Key Authentication Anti-Pattern** class exercise.
+Frontend for the API Key authentication exercise.
 
-This client calls a separate backend API and sends a static `x-api-key` header from the browser. That is intentional: the assignment is to reproduce a common security weakness, not to build production authentication.
-
-## Requirements
-
-- Backend API running at `http://localhost:8000`
-- A modern browser (Chrome, Firefox, Edge, or similar)
-
-## Files
+The browser never sees the API key. JavaScript only calls same-origin paths such as `/api/data`. **Nginx** reverse-proxies those requests to the backend running on the host and adds the `x-api-key` header on the server side.
 
 ```text
-security-frontend/
-├── index.html
-├── styles.css
-├── app.js
-└── README.md
+Browser  --(no API key)-->  Nginx (this Docker container)
+                                |
+                                |  x-api-key added here
+                                v
+                         Backend on the host
+                         (host.docker.internal:8000)
 ```
 
-## How to run
+This repository is independent from the backend repository. Do not put both in one Compose file.
 
-1. Start the backend from the `security-api` repository first.
-2. Open `index.html` in a browser.
+## Prerequisites
 
-You can open the file directly:
+1. Start the backend **locally** from the other repository so it listens on port `8000`.
+2. Docker must be running (Docker Desktop on Windows is fine).
 
-```text
-file:///C:/path/to/security-frontend/index.html
-```
+## Build and run
 
-Or serve the folder with a simple local server (recommended):
+From this `security-frontend` folder:
 
 ```bash
-python -m http.server 5500
+docker build -t security-frontend .
 ```
 
-Then open:
+```bash
+docker run --name security-frontend -p 80:80 -e API_KEY=your-secret-key -e BACKEND_HOST=host.docker.internal -e BACKEND_PORT=8000 --add-host=host.docker.internal:host-gateway security-frontend
+```
+
+`--add-host=host.docker.internal:host-gateway` lets the container reach the host on Linux as well as Docker Desktop (Windows/Mac).
+
+Replace `your-secret-key` with the same key the local backend expects. The key is passed only as a runtime environment variable. It is not in `app.js`, `index.html`, `styles.css`, the Dockerfile, or the Nginx template.
+
+Open:
 
 ```text
-http://localhost:5500
+http://localhost
 ```
 
-## Configuration
+Stop the container with `Ctrl+C`, then:
 
-The frontend is configured in `app.js`:
+```bash
+docker rm security-frontend
+```
 
-- API URL: `http://localhost:8000`
-- API key: `mi-api-key-secreta-123456`
+## Verify that Nginx has the API key
+
+```bash
+docker exec -it security-frontend cat /etc/nginx/conf.d/default.conf
+```
+
+You should see `proxy_set_header x-api-key` with the value you passed in `-e API_KEY=...`. That file is generated inside the container at startup; it is not stored in Git.
+
+## Verify that the browser does not send the key
+
+1. Open `http://localhost` and DevTools → **Network**.
+2. Click **Get Protected Data** or **Send POST Request**.
+3. Select the request to `/api/data`.
+4. Confirm there is **no** `x-api-key` request header.
+
+The key is added only on the hop from Nginx to `host.docker.internal:8000`.
 
 ## Buttons
 
-| Button | Request | API key |
-| ------ | ------- | ------- |
-| Check Health | `GET /health` | No |
-| Get Protected Data | `GET /api/data` | Yes (`x-api-key`) |
-| Send POST Request | `POST /api/data` | Yes (`x-api-key`) |
-
-The JSON (or error) returned by the API is shown in the response panel.
-
-## Expected results
-
-With the backend running:
-
-- **Check Health** → `200 OK` and `{"status": "ok"}`
-- **Get Protected Data** → `200 OK` and the protected JSON payload
-- **Send POST Request** → `200 OK` and `{"message": "POST received"}`
-
-If the backend is not running, the page shows a connection error.
-
-## Why this is an anti-pattern
-
-The API key is stored in client-side JavaScript (`app.js`). Anyone can open DevTools, view the source, or inspect the network tab and copy the key. A static key in the browser is not a real authentication or authorization mechanism.
+| Button | Browser request | Who adds `x-api-key` |
+| ------ | --------------- | -------------------- |
+| Check Health | `GET /health` | Nobody (public endpoint) |
+| Get Protected Data | `GET /api/data` | Nginx |
+| Send POST Request | `POST /api/data` | Nginx |
