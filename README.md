@@ -13,12 +13,12 @@ Browser  --(no API key)-->  Nginx (this Docker container)
                          (host.docker.internal:8000)
 ```
 
-This repository is independent from the backend repository. Do not put both in one Compose file.
+This repository is independent from the backend repository.
 
 ## Prerequisites
 
 1. Start the backend **locally** from the other repository so it listens on port `8000`.
-2. Docker must be running (Docker Desktop on Windows is fine).
+2. Docker must be running.
 
 ## Build and run
 
