@@ -4,6 +4,8 @@ const buttons = {
     health: document.getElementById("btn-health"),
     get: document.getElementById("btn-get"),
     post: document.getElementById("btn-post"),
+    encrypt: document.getElementById("btn-encrypt"),
+    decrypt: document.getElementById("btn-decrypt"),
 };
 
 function setLoading(isLoading) {
@@ -56,6 +58,41 @@ async function callApi(path, method) {
     }
 }
 
+async function callApiPost(path, data) {
+    setLoading(true);
+    showStatus("Loading", null);
+    responseBox.textContent = "Sending request...";
+
+    try {
+        const response = await fetch(path, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+        const rawBody = await response.text();
+        const formattedBody = formatBody(rawBody);
+
+        showStatus(`${response.status} ${response.statusText}`, response.ok);
+        responseBox.textContent =
+            `POST ${path}\n` +
+            `Status: ${response.status} ${response.statusText}\n\n` +
+            formattedBody;
+    } catch (error) {
+        showStatus("Request failed", false);
+        responseBox.textContent =
+            "Could not reach the API through this page.\n\n" +
+            `Details: ${error.message}`;
+    } finally {
+        setLoading(false);
+    }
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
 buttons.health.addEventListener("click", () => {
     callApi("/health", "GET");
 });
@@ -66,4 +103,18 @@ buttons.get.addEventListener("click", () => {
 
 buttons.post.addEventListener("click", () => {
     callApi("/api/data", "POST");
+});
+
+buttons.encrypt.addEventListener("click", () => {
+    const message = prompt("Enter message to encrypt:");
+    if (message && message.trim()) {
+        callApiPost("/api/encrypt", { mensaje: message });
+    }
+});
+
+buttons.decrypt.addEventListener("click", () => {
+    const ciphertext = prompt("Paste the encrypted Base64 string to decrypt:");
+    if (ciphertext && ciphertext.trim()) {
+        callApiPost("/api/decrypt", { mensaje: ciphertext });
+    }
 });
