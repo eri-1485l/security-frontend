@@ -13,6 +13,10 @@
     --health-hover: #0d9488;
     --post: #7c3aed;
     --post-hover: #6d28d9;
+    --encrypt: #059669;
+    --encrypt-hover: #047857;
+    --decrypt: #d97706;
+    --decrypt-hover: #b45309;
 }
 
 * {
@@ -72,6 +76,13 @@ code {
     margin: 1.75rem 0;
 }
 
+.actions hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0.25rem 0;
+}
+
 button {
     border: none;
     border-radius: 8px;
@@ -117,6 +128,28 @@ button:disabled {
     background: var(--post-hover);
 }
 
+/* ============================================
+   NUEVOS BOTONES DE CIFRADO
+   ============================================ */
+#btn-encrypt {
+    background: var(--encrypt);
+}
+
+#btn-encrypt:hover {
+    background: var(--encrypt-hover);
+}
+
+#btn-decrypt {
+    background: var(--decrypt);
+}
+
+#btn-decrypt:hover {
+    background: var(--decrypt-hover);
+}
+
+/* ============================================
+   RESPONSE PANEL
+   ============================================ */
 .response-panel {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -167,6 +200,9 @@ h2 {
     color: #cbd5e1;
 }
 
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 @media (max-width: 600px) {
     .actions {
         flex-direction: column;
