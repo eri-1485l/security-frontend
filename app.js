@@ -1,5 +1,10 @@
+// ============================================
+// DOM ELEMENTS
+// ============================================
+
 const responseBox = document.getElementById("response-box");
 const statusBadge = document.getElementById("status-badge");
+
 const buttons = {
     health: document.getElementById("btn-health"),
     get: document.getElementById("btn-get"),
@@ -8,9 +13,23 @@ const buttons = {
     decrypt: document.getElementById("btn-decrypt"),
 };
 
+// Login elements
+const loginUsername = document.getElementById("login-username");
+const loginPassword = document.getElementById("login-password");
+const btnLogin = document.getElementById("btn-login");
+const loginStatus = document.getElementById("login-status");
+
+// Screen elements
+const loginScreen = document.getElementById("login-screen");
+const mainScreen = document.getElementById("main-screen");
+
+// ============================================
+// UTILITIES
+// ============================================
+
 function setLoading(isLoading) {
     Object.values(buttons).forEach((button) => {
-        button.disabled = isLoading;
+        if (button) button.disabled = isLoading;
     });
 }
 
@@ -32,6 +51,78 @@ function formatBody(text) {
         return text || "(empty response)";
     }
 }
+
+// ============================================
+// SCREEN MANAGEMENT
+// ============================================
+
+function showMainScreen() {
+    loginScreen.classList.add("hidden");
+    mainScreen.classList.remove("hidden");
+}
+
+function showLoginScreen() {
+    mainScreen.classList.add("hidden");
+    loginScreen.classList.remove("hidden");
+}
+
+// ============================================
+// LOGIN
+// ============================================
+
+async function login() {
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (!username || !password) {
+        loginStatus.textContent = "Please enter username and password";
+        loginStatus.className = "error";
+        return;
+    }
+
+    btnLogin.disabled = true;
+    loginStatus.textContent = "Authenticating...";
+    loginStatus.className = "";
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            loginStatus.textContent = `Welcome, ${data.username}!`;
+            loginStatus.className = "success";
+            setTimeout(showMainScreen, 800);
+        } else {
+            loginStatus.textContent = data.detail || "Login failed";
+            loginStatus.className = "error";
+        }
+    } catch (error) {
+        loginStatus.textContent = "Connection error";
+        loginStatus.className = "error";
+    } finally {
+        btnLogin.disabled = false;
+    }
+}
+
+if (btnLogin) {
+    btnLogin.addEventListener("click", login);
+}
+
+// Allow Enter key in password field
+if (loginPassword) {
+    loginPassword.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") login();
+    });
+}
+
+// ============================================
+// API CALLS
+// ============================================
 
 async function callApi(path, method) {
     setLoading(true);
@@ -90,31 +181,41 @@ async function callApiPost(path, data) {
 }
 
 // ============================================
-// EVENT LISTENERS
+// EVENT LISTENERS (main screen)
 // ============================================
 
-buttons.health.addEventListener("click", () => {
-    callApi("/health", "GET");
-});
+if (buttons.health) {
+    buttons.health.addEventListener("click", () => {
+        callApi("/health", "GET");
+    });
+}
 
-buttons.get.addEventListener("click", () => {
-    callApi("/api/data", "GET");
-});
+if (buttons.get) {
+    buttons.get.addEventListener("click", () => {
+        callApi("/api/data", "GET");
+    });
+}
 
-buttons.post.addEventListener("click", () => {
-    callApi("/api/data", "POST");
-});
+if (buttons.post) {
+    buttons.post.addEventListener("click", () => {
+        callApi("/api/data", "POST");
+    });
+}
 
-buttons.encrypt.addEventListener("click", () => {
-    const message = prompt("Enter message to encrypt:");
-    if (message && message.trim()) {
-        callApiPost("/api/encrypt", { mensaje: message });
-    }
-});
+if (buttons.encrypt) {
+    buttons.encrypt.addEventListener("click", () => {
+        const message = prompt("Enter message to encrypt:");
+        if (message && message.trim()) {
+            callApiPost("/api/encrypt", { mensaje: message });
+        }
+    });
+}
 
-buttons.decrypt.addEventListener("click", () => {
-    const ciphertext = prompt("Paste the encrypted Base64 string to decrypt:");
-    if (ciphertext && ciphertext.trim()) {
-        callApiPost("/api/decrypt", { mensaje: ciphertext });
-    }
-});
+if (buttons.decrypt) {
+    buttons.decrypt.addEventListener("click", () => {
+        const ciphertext = prompt("Paste the encrypted Base64 string to decrypt:");
+        if (ciphertext && ciphertext.trim()) {
+            callApiPost("/api/decrypt", { mensaje: ciphertext });
+        }
+    });
+}
