@@ -33,14 +33,34 @@ body {
     padding: 2rem 1rem;
 }
 
+/* ============================================
+   SCREEN MANAGEMENT
+   ============================================ */
+
+.screen {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.screen.hidden {
+    display: none;
+}
+
 .container {
     max-width: 720px;
+    width: 100%;
     margin: 0 auto;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.login-container {
+    max-width: 460px;
 }
 
 .eyebrow {
@@ -61,13 +81,77 @@ h1 {
     line-height: 1.5;
 }
 
-code {
-    background: #0f172a;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.1rem 0.35rem;
-    font-size: 0.9em;
+/* ============================================
+   LOGIN PANEL
+   ============================================ */
+
+.login-panel {
+    margin-top: 1.75rem;
 }
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.login-form input {
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #0f172a;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+.login-form input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#btn-login {
+    background: var(--button);
+    color: #fff;
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#btn-login:hover {
+    background: var(--button-hover);
+    transform: translateY(-1px);
+}
+
+#btn-login:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+}
+
+#login-status {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    text-align: center;
+    min-height: 1.2rem;
+}
+
+#login-status.success {
+    color: var(--success);
+}
+
+#login-status.error {
+    color: var(--error);
+}
+
+/* ============================================
+   ACTIONS / BUTTONS
+   ============================================ */
 
 .actions {
     display: flex;
@@ -128,9 +212,6 @@ button:disabled {
     background: var(--post-hover);
 }
 
-/* ============================================
-   NUEVOS BOTONES DE CIFRADO
-   ============================================ */
 #btn-encrypt {
     background: var(--encrypt);
 }
@@ -150,6 +231,7 @@ button:disabled {
 /* ============================================
    RESPONSE PANEL
    ============================================ */
+
 .response-panel {
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -203,6 +285,7 @@ h2 {
 /* ============================================
    RESPONSIVE
    ============================================ */
+
 @media (max-width: 600px) {
     .actions {
         flex-direction: column;
