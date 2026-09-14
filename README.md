@@ -2,12 +2,12 @@
 
 Frontend for the API Key authentication exercise.
 
-The browser never sees the API key. JavaScript only calls same-origin paths such as `/api/data`, `/api/encrypt`, and `/api/decrypt`. **Nginx** reverse-proxies those requests to the backend running on the host and adds the `x-api-key` header on the server side.
+The browser never sees the API key. JavaScript only calls same-origin paths such as `/login`, `/api/data`, `/api/encrypt`, and `/api/decrypt`. **Nginx** reverse-proxies those requests to the backend running on the host and adds the `x-api-key` header on the server side for protected API routes.
 
 ```text
 Browser  --(no API key)-->  Nginx (this Docker container)
                                 |
-                                |  x-api-key added here
+                                |  x-api-key added here (protected /api routes)
                                 v
                          Backend on the host
                          (host.docker.internal:8000)
@@ -15,10 +15,22 @@ Browser  --(no API key)-->  Nginx (this Docker container)
 
 This repository is independent from the backend repository. Do not put both in one Compose file.
 
+## Login screen
+
+The HTML has two screens: `login-screen` and `main-screen`.
+
+- The **login screen** is shown first.
+- The user enters a username and password and clicks **Login**.
+- The frontend sends `POST /login` to the backend (proxied by Nginx). Authentication uses LDAP credentials, not the API Key.
+- After a successful response, the **main screen** is shown automatically.
+
+Login UI lives in `index.html`. Screen switching and the login request are in `app.js`. Styles for the login panel and screen transitions are in `styles.css`. Nginx proxies `/login` in `nginx/default.conf.template`.
+
 ## Prerequisites
 
 1. Start the backend **locally** from the other repository so it listens on port `8000`.
-2. Docker must be running (Docker Desktop on Windows is fine).
+2. Start OpenLDAP (port `389`) so `POST /login` can authenticate users.
+3. Docker must be running (Docker Desktop on Windows is fine).
 
 ## Build and run
 
@@ -36,6 +48,8 @@ docker run --name security-frontend -p 80:80 -e API_KEY=your-secret-key -e BACKE
 
 Replace `your-secret-key` with the same key the local backend expects. The key is passed only as a runtime environment variable. It is not in `app.js`, `index.html`, `styles.css`, the Dockerfile, or the Nginx template.
 
+The API Key is injected by Nginx on the **server side**. The browser never sends `x-api-key`. Login uses LDAP username and password only.
+
 Open:
 
 ```text
@@ -48,6 +62,8 @@ Stop the container with `Ctrl+C`, then:
 docker rm security-frontend
 ```
 
+After an API Key rotation, the `rotate-secrets` script recreates this container automatically with the new key. You do not need to rebuild the image for a key change.
+
 ## Verify that Nginx has the API key
 
 ```bash
@@ -58,7 +74,7 @@ You should see `proxy_set_header x-api-key` with the value you passed in `-e API
 
 ## Verify that the browser does not send the key
 
-1. Open `http://localhost` and DevTools → **Network**.
+1. Open `http://localhost`, log in, then open DevTools → **Network**.
 2. Click **Get Protected Data**, **Send POST Request**, **Encrypt Message**, or **Decrypt Message**.
 3. Select the request (`/api/data`, `/api/encrypt`, or `/api/decrypt`).
 4. Confirm there is **no** `x-api-key` request header.
@@ -78,18 +94,27 @@ A horizontal separator sits between the original actions and the crypto actions.
 
 | Button | Browser request | Who adds `x-api-key` |
 | ------ | --------------- | -------------------- |
+| Login | `POST /login` | Nobody (uses LDAP credentials) |
 | Check Health | `GET /health` | Nobody (public endpoint) |
 | Get Protected Data | `GET /api/data` | Nginx |
 | Send POST Request | `POST /api/data` | Nginx |
 | Encrypt Message | `POST /api/encrypt` | Nginx |
 | Decrypt Message | `POST /api/decrypt` | Nginx |
 
+## Test login from the frontend
+
+1. Start the backend on port `8000` and OpenLDAP on port `389`.
+2. Open `http://localhost`. The login screen should appear first.
+3. Enter a lab user (for example `alice` / `alice123`) and click **Login**.
+4. A success message is shown, then the main screen appears.
+5. Invalid credentials show an error and keep you on the login screen.
+
 ## Test encryption and decryption from the frontend
 
-1. Open `http://localhost` with the backend running on port `8000`.
+1. Log in so the main screen is visible, with the backend running on port `8000`.
 2. Click **Encrypt Message**, type a short string, and confirm.
 3. Copy `encrypted_data` from the response panel.
 4. Click **Decrypt Message**, paste that value, and confirm.
 5. The response should show the original string in `plaintext`.
 
-If you get `401`, the container’s `API_KEY` does not match the backend `.env` (for example after `rotate_secret.py` ran). Recreate the frontend container with the current key, or let the rotation script restart it.
+If you get `401` on protected API calls, the container’s `API_KEY` does not match the backend `.env`. After a rotation, wait for `rotate-secrets` to recreate the frontend container, or recreate it yourself with the current key.
