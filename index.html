@@ -7,32 +7,60 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <main class="container">
-        <header>
-            <p class="eyebrow">Course exercise</p>
-            <h1>Security API Exercise</h1>
-            <p class="subtitle">
-                Same-origin requests to this site. Nginx reverse-proxies API calls to the backend.
-            </p>
-        </header>
 
-        <section class="actions" aria-label="API actions">
-            <button type="button" id="btn-health">Check Health</button>
-            <button type="button" id="btn-get">Get Protected Data</button>
-            <button type="button" id="btn-post">Send POST Request</button>
-            <hr>
-            <button type="button" id="btn-encrypt">🔐 Encrypt Message</button>
-            <button type="button" id="btn-decrypt">🔓 Decrypt Message</button>
-        </section>
+    <!-- ============================================ -->
+    <!-- PANTALLA DE LOGIN                             -->
+    <!-- ============================================ -->
+    <div id="login-screen" class="screen">
+        <main class="container login-container">
+            <header>
+                <p class="eyebrow">Course exercise</p>
+                <h1>Login</h1>
+                <p class="subtitle">Please sign in with your LDAP credentials to continue.</p>
+            </header>
 
-        <section class="response-panel" aria-live="polite">
-            <div class="response-header">
-                <h2>Response</h2>
-                <span id="status-badge" class="badge">Waiting</span>
-            </div>
-            <pre id="response-box" class="response-box">API response will appear here.</pre>
-        </section>
-    </main>
+            <section class="login-panel">
+                <div class="login-form">
+                    <input type="text" id="login-username" placeholder="Username" autocomplete="username" />
+                    <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+                    <button type="button" id="btn-login">Login</button>
+                </div>
+                <p id="login-status"></p>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PANTALLA PRINCIPAL (oculta al inicio)         -->
+    <!-- ============================================ -->
+    <div id="main-screen" class="screen hidden">
+        <main class="container">
+            <header>
+                <p class="eyebrow">Course exercise</p>
+                <h1>Security API Exercise</h1>
+                <p class="subtitle">
+                    Same-origin requests to this site. Nginx reverse-proxies API calls to the backend.
+                </p>
+            </header>
+
+            <section class="actions" aria-label="API actions">
+                <button type="button" id="btn-health">Check Health</button>
+                <button type="button" id="btn-get">Get Protected Data</button>
+                <button type="button" id="btn-post">Send POST Request</button>
+                <hr>
+                <button type="button" id="btn-encrypt">Encrypt Message</button>
+                <button type="button" id="btn-decrypt">Decrypt Message</button>
+            </section>
+
+            <section class="response-panel" aria-live="polite">
+                <div class="response-header">
+                    <h2>Response</h2>
+                    <span id="status-badge" class="badge">Waiting</span>
+                </div>
+                <pre id="response-box" class="response-box">API response will appear here.</pre>
+            </section>
+        </main>
+    </div>
 
     <script src="app.js"></script>
 </body>
