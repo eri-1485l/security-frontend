@@ -26,4 +26,11 @@ server {
         proxy_set_header Host $host;
         proxy_set_header x-api-key "${API_KEY}";
     }
+
+    location /login {
+        proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header x-api-key "${API_KEY}";
+    }
 }
